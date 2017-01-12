@@ -23,13 +23,29 @@ for my $row (@dataRows) {
 	my $url = $urlPair[1];
 	my $content = get($url);
 
-	my $text;
-	if ($content =~ /<div itemprop=\"articleBody\">(.+?)<\/div>/gi) {
-		$text = $1;
-		$text =~ s/<.+?>//g;
+	my $parsedText;
+
+	#-> headline #
+	if ($content =~ /<h1 itemprop=\"headline\">(.+?)<\/h1>/) {
+		$parsedText .= lc "$1  ";
 	} else {
-		$text = $url . "\t<===";
+		### No headline found for: $url
 	}
 
-	print $fh "$text\n";
+	#-> sub-headline #
+	if ($content =~ /<h2 itemprop=\"description\">(.+?)<\/h2>/gi) {
+		$parsedText .= lc "$1 ";
+	} else {
+		### No subheadline found for: $url
+	}
+
+	#-> articleBody #
+	if ($content =~ /<div itemprop=\"articleBody\">(.+?)<\/div>/gi) {
+		$parsedText .= lc $1;
+		$parsedText =~ s/<.+?>//g;
+	} else {
+		$parsedText = $url . "\t<===";
+	}
+
+	print $fh "$parsedText\n";
 }
