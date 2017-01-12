@@ -23,11 +23,12 @@ for my $row (@dataRows) {
 	my $url = $urlPair[1];
 	my $content = get($url);
 
-	my $text = $1 if ($content =~ /<div itemprop=\"articleBody\">(.+?)<\/div>/gi);
-	if (not defined $text) {
-		$text = $url . "\t<===";
-	} else {
+	my $text;
+	if ($content =~ /<div itemprop=\"articleBody\">(.+?)<\/div>/gi) {
+		$text = $1;
 		$text =~ s/<.+?>//g;
+	} else {
+		$text = $url . "\t<===";
 	}
 
 	print $fh "$text\n";
