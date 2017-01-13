@@ -26,26 +26,42 @@ for my $row (@dataRows) {
 	my $parsedText;
 
 	#-> headline #
-	if ($content =~ /<h1 itemprop=\"headline\">(.+?)<\/h1>/) {
+	if ($content =~ /<h1 itemprop=\"headline\">(.+?)<\/h1>/i) {	# Gundem
 		$parsedText .= lc "$1  ";
+	} elsif ($content =~ /<div class=\"baslik-spot\">(.+?)<\/div>/i) {	# Spor
+		$parsedText .= lc "$1 ";
 	} else {
-		### No headline found for: $url
+		# No headline found for: $url
 	}
 
 	#-> sub-headline #
-	if ($content =~ /<h2 itemprop=\"description\">(.+?)<\/h2>/gi) {
+	if ($content =~ /<h2 itemprop=\"description\">(.+?)<\/h2>/i) { # Gundem
 		$parsedText .= lc "$1 ";
 	} else {
-		### No subheadline found for: $url
+		# No subheadline found for: $url
+		# Also we handled sub-headline for Spor at headline
 	}
 
 	#-> articleBody #
-	if ($content =~ /<div itemprop=\"articleBody\">(.+?)<\/div>/gi) {
-		$parsedText .= lc $1;
-		$parsedText =~ s/<.+?>//g;
+	if ($content =~ /<div itemprop=\"articleBody\">(.+?)<\/div>/i) { # Gundem
+		$parsedText .= lc "$1 ";
+	} elsif ($content =~ /<div id=\"divAdnetKeyword3\" class=\"text\" itemprop=\"articleBody\">/i) {
+		$parsedText .= lc "$1 ";
 	} else {
-		$parsedText = $url . "\t<===";
+		#$parsedText = $url . "\t<===";
+		# No articleBody found for: $url
 	}
 
-	print $fh "$parsedText\n";
+	if ( not defined $parsedText ) {
+		### parsedText not defined for: $url
+	} else {
+		removeTags($parsedText);
+		print $fh "$parsedText\n";
+	}
+}
+
+sub removeTags {
+	$_[0] =~ s/<.+?>//g;
+
+	return $_[0];
 }
