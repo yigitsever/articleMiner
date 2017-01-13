@@ -18,6 +18,8 @@ tie my @dataRows, 'Tie::File', $dataFileName or die "Cannot initialize TieFile, 
 
 open(my $fh, '>:encoding(UTF-8)', 'output') or die "Could not open bla bla $!";
 
+my $success = 0;
+
 for my $row (@dataRows) {
 	my @urlPair = split ",", $row;
 	my $url = $urlPair[1];
@@ -48,7 +50,7 @@ for my $row (@dataRows) {
 	} elsif ($content =~ /<div id=\"divAdnetKeyword3\" class=\"text\" itemprop=\"articleBody\">/i) {
 		$parsedText .= lc "$1 ";
 	} else {
-		#$parsedText = $url . "\t<===";
+		# $parsedText = $url . "\t<===";
 		# No articleBody found for: $url
 	}
 
@@ -56,9 +58,12 @@ for my $row (@dataRows) {
 		### parsedText not defined for: $url
 	} else {
 		removeTags($parsedText);
+		$success++;
 		print $fh "$parsedText\n";
 	}
 }
+
+print "Rules work for $success / $#dataRows\n";
 
 sub removeTags {
 	$_[0] =~ s/<.+?>//g;
